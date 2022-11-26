@@ -1,48 +1,32 @@
 import { Request, Response } from "express";
 const express = require("express");
 const router = express.Router();
-const User = require("../models/login.model");
-const RefreshToken = require("../models/refreshToken.model");
 const bodyParser = require("body-parser");
-require("dotenv/config");
-const {
-  verifyAccessToken,
-  createAccessToken,
-  createRefreshToken,
-} = require("../authorization");
+const { user } = require("../services/login.service");
+//const {authorization} = require("../middlewares/authorization")
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: false }));
 
 router.post("/", async (req: Request, res: Response) => {
-  try {
-    const user = await User.findOne({
-      password: req.body.password,
-      username: req.body.username,
-    });
-    const refreshTokens = await new RefreshToken({
-      owner: user.id,
-    });
-
-    if (user == null) {
-      return res.status(401).send("invalid user");
-    } else {
-      createAccessToken(user.id);
-      createRefreshToken(user.id, refreshTokens.id);
-      return res.status(200).send("tokens created");
-    }
-  } catch (err) {
-    console.log({ err });
-    return res.status(500).send({ err });
-  }
+  const login = await user.loginUser(req.body.username, req.body.password);
+  return res
+    .status(login.status)
+    .json({ message: login.message, data: login.data });
 });
 
-router.post("/post", verifyAccessToken, async (req: Request, res: Response) => {
-  try {
-    return res.send("post");
-  } catch (err) {
-    return res.send({ err });
-  }
+router.post("/refresh", async (req: Request, res: Response) => {
+  const refresh = await user.refresh(req.body.refreshToken);
+  return res
+    .status(refresh.status)
+    .json({ message: refresh.message, data: refresh.data });
+});
+
+router.post("/logout", async (req: Request, res: Response) => {
+  const logout = await user.logout(req.body.refreshToken);
+  return res
+    .status(logout.status)
+    .json({ message: logout.message, data: logout.data });
 });
 
 module.exports = router;

@@ -4,13 +4,13 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 require("dotenv/config");
-//routes
 const loginRoute = require("./controllers/login.controller");
-app.use("/login", loginRoute);
+//const post = require("./controllers/profile.controller");
+app.use("/user", loginRoute);
+//app.use("/post", post);
 app.get("/", (req, res) => {
     res.send("log in..");
 });
-// connect db
 mongoose.connect(process.env.DB_CONNECT, { useNewUrlParser: true }, (err, res) => {
     if (err) {
         console.log({ err });
@@ -18,7 +18,6 @@ mongoose.connect(process.env.DB_CONNECT, { useNewUrlParser: true }, (err, res) =
     console.log("database connected......");
     return;
 });
-//port
 app.listen(3001, () => {
     console.log("listening.....");
 });

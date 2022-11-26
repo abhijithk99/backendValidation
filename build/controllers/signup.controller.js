@@ -11,28 +11,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const router = express.Router();
+const User = require("../models/login.model");
+const RefreshToken = require("../models/refreshToken.model");
 const bodyParser = require("body-parser");
-const { user } = require("../services/login.service");
-//const {authorization} = require("../middlewares/authorization")
+require("dotenv/config");
+const { verifyAccessToken, createAccessToken, createRefreshToken, } = require("../authorization");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: false }));
-router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const login = yield user.loginUser(req.body.username, req.body.password);
-    console.log("blabla");
-    return res
-        .status(login.status)
-        .json({ message: login.message, data: login.data });
-}));
-router.post("/refresh", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const refresh = yield user.refresh(req.body.refreshToken);
-    return res
-        .status(refresh.status)
-        .json({ message: refresh.message, data: refresh.data });
-}));
-router.post("/logout", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const logout = yield user.logout(req.body.refreshToken);
-    return res
-        .status(logout.status)
-        .json({ message: logout.message, data: logout.data });
+router.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    //  const refreshTokens = await new RefreshToken({
+    //    owner: user.id,
+    // });
+    try {
+        const user = yield new User({
+            password: req.body.password,
+            username: req.body.username,
+        });
+        const saveData = yield user.save();
+        const refreshTokens = yield new RefreshToken({
+            owner: user.id,
+        });
+        const RefreshTokens = createRefreshToken(user.id, refreshTokens.id);
+        next();
+        user.refreshToken = RefreshTokens;
+        user.save();
+        return res.json(saveData);
+    }
+    catch (error) {
+        return res.send("err");
+    }
 }));
 module.exports = router;

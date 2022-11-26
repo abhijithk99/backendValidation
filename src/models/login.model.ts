@@ -1,5 +1,5 @@
-var mongoose = require("mongoose");
-var { stringify } = require("nodemon/lib/utils");
+const mongoose = require("mongoose");
+export {};
 
 const userSchema = mongoose.Schema({
   username: {
@@ -13,4 +13,4 @@ const userSchema = mongoose.Schema({
 });
 
 const User = mongoose.model("users", userSchema);
-module.exports = User;
+module.exports = { User };

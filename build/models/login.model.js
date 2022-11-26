@@ -1,6 +1,6 @@
 "use strict";
-var mongoose = require("mongoose");
-var { stringify } = require("nodemon/lib/utils");
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongoose = require("mongoose");
 const userSchema = mongoose.Schema({
     username: {
         type: String,
@@ -12,4 +12,4 @@ const userSchema = mongoose.Schema({
     },
 });
 const User = mongoose.model("users", userSchema);
-module.exports = User;
+module.exports = { User };
